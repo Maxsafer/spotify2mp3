@@ -1,4 +1,4 @@
-# spotify2youtube-downloader
+# spotify2youtube-downloader.mp3
 Download Spotify playlists as .mp3 from YouTube.
 
 <h3> Dependencies </h3>
