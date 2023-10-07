@@ -66,23 +66,33 @@ def complete_songlist(tok, plID):
 
 def downloadSongs(song, maxFileSize, folder):
     try:
+        # open log file
         f = open(folder + "songsLog.csv", "a", newline='')
+
+        # get YouTube video list
         results = YoutubeSearch(song, max_results=1).to_dict()
+
+        # get YouTube video URL and Object
         url = 'https://www.youtube.com' + results[0].get('url_suffix')
         yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
         
+        # get YouTube audio only from video
         video = yt.streams.get_audio_only()
 
+        # abort if size is bigger than maxFileSize
         if video.filesize_mb > maxFileSize:
             f.write(f"\nFailed, File size too big {video.filesize_mb} MB, " + song + ", " + url)
             return
 
+        # download audio only as .mp4 and set paths
         out_file = video.download(output_path=folder)
-        
-        # save the file 
-        base, ext = os.path.splitext(out_file) 
-        new_file = base + '.mp3'
-        os.rename(out_file, new_file)
+        base, ext = os.path.splitext(out_file)
+
+        # ffmpeg, convert mp4 to mp3 without corrupting data and delete mp4
+        command = f'ffmpeg -i "{base}{ext}" "{base}.mp3"'
+        os.system(command)
+        os.remove(base + ext)
+
         try:
             f.write("\nOk, Downloaded, " + str(base) + f" - song: {song}" + ", " + str(url))
         except Exception as e:
@@ -96,7 +106,7 @@ def downloadSongs(song, maxFileSize, folder):
 
 if __name__ == '__main__':
     tokenM = get_token()
-    playListID = ""
+    playListID = "2JOHUWecmpONy8NBQk7alx"
     listPlayList = complete_songlist(tokenM, playListID)
     folder = "./songs/"
     maxFileSize = 10    # in MB
