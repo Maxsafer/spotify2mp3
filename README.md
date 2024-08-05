@@ -1,6 +1,6 @@
 # spotify2mp3
 Download Spotify playlists as .mp3 from YouTube.
-Scipt is light weight and really fast. Songs downloaded work with Serato & Traktor.
+Script is light weight and really fast. Songs downloaded work with Serato & Traktor.
 
 <h3> Dependencies </h3>
 <ul>- A Spotify application token must be created and provided in order to run: <br> https://developer.spotify.com/dashboard </ul>
