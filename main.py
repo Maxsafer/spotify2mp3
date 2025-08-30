@@ -69,29 +69,30 @@ def complete_songlist(token, plID):
 def downloadSongs(song, maxFileSize, folder):
     url = ""
     try:
-        # Open log file
         with open(os.path.join(folder, "songsLog.csv"), "a", newline='') as f:
-            # Get current timestamp
             timestamp = datetime.datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
-            
-            # Search YouTube for the song
-            results = YoutubeSearch(song, max_results=1).to_dict()
-            url = 'https://www.youtube.com' + results[0].get('url_suffix')
-            
-            # Set up yt-dlp options
+
+            # 1) Get several results and choose the first NON-playlist (prefer /watch or /shorts)
+            results = YoutubeSearch(song, max_results=5).to_dict()  # was 1
+            picked = next((r for r in results
+                           if r.get('url_suffix', '').startswith(('/watch', '/shorts'))), None)
+            if not picked:
+                f.write("\n" + timestamp + " Skipped, no video result, " + song)
+                return
+            url = 'https://www.youtube.com' + picked.get('url_suffix')
+
+            # 2) Tell yt-dlp not to download playlists even if one slips through
             ydl_opts = {
                 'format': 'bestaudio/best',
                 'outtmpl': os.path.join(folder, '%(title)s.%(ext)s'),
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                }],
-                'max_filesize': maxFileSize * 1024 * 1024,  # Convert MB to bytes
+                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3'}],
+                'max_filesize': maxFileSize * 1024 * 1024,
+                'noplaylist': True,
             }
-            
+
             with YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
-            
+
             f.write("\n" + timestamp + " Ok, Downloaded, " + song + ", " + url)
     except Exception as e:
         with open(os.path.join(folder, "songsLog.csv"), "a", newline='') as f:
