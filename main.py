@@ -1,14 +1,17 @@
+import argparse
+import math
+import os
+import re
+import json
+import base64
+import datetime
 from youtube_search import YoutubeSearch
 from joblib import Parallel, delayed
 from customSecrets import getSecret
+from yt_dlp import YoutubeDL
 from pytube import YouTube 
-from requests import post
 import requests
-import base64
-import json
-import math
-import re
-import os
+from requests import post
 
 def get_token():
     auth_string = getSecret.client_id + ":" + getSecret.client_secret
@@ -26,89 +29,103 @@ def get_token():
     token = json_result["access_token"]
     return token
 
-def get_songs(token, os, plID):
+def get_songs(token, offset, plID):
     url = f"https://api.spotify.com/v1/playlists/{plID}/tracks"
     payload = ""
-    querystring = {"offset": os}
+    querystring = {"offset": offset}
     headers = {"Authorization": "Bearer " + token}
-    response = requests.request("GET", url, data=payload, headers=headers, params=querystring)
+    response = requests.get(url, data=payload, headers=headers, params=querystring)
     json_response = json.loads(response.content)
     return json_response
 
 def song_list(songDict):
     songs = []
-    for item in songDict.get("items"):
+    for item in songDict.get("items", []):
         track = item.get("track")
-        songArtists = track.get("artists")
-        songArtistsString = ''
-        for artist in songArtists:
-            songArtistsString += (" " + artist.get("name"))
+        if not track:
+            continue
+        songArtists = track.get("artists", [])
+        songArtistsString = ' '.join(artist.get("name", "") for artist in songArtists)
         songName = track.get("name")
-        query = songName + " - " + songArtistsString.strip()
+        query = f"{songName} - {songArtistsString.strip()}"
         songs.append(query)
-
     return songs
 
-def complete_songlist(tok, plID):
-    os = 0
-    dictSongs = get_songs(tok, os, plID)
+def complete_songlist(token, plID):
+    offset = 0
+    dictSongs = get_songs(token, offset, plID)
     listSongs = song_list(dictSongs)
 
-    intTotalSongs = dictSongs.get("total")
+    intTotalSongs = dictSongs.get("total", 0)
     intTimesToLoop = math.ceil(intTotalSongs/100)
 
-    for x in range(0, intTimesToLoop):
-        os += 100
-        dictSongs = get_songs(tok, os, plID)
-        listSongs = listSongs + song_list(dictSongs)
+    for x in range(1, intTimesToLoop):
+        offset += 100
+        dictSongs = get_songs(token, offset, plID)
+        listSongs += song_list(dictSongs)
 
     return listSongs
 
 def downloadSongs(song, maxFileSize, folder):
+    url = ""
     try:
-        # open log file
-        f = open(folder + "songsLog.csv", "a", newline='')
-
-        # get YouTube video list
-        results = YoutubeSearch(song, max_results=1).to_dict()
-
-        # get YouTube video URL and Object
-        url = 'https://www.youtube.com' + results[0].get('url_suffix')
-        yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
-        
-        # get YouTube audio only from video
-        video = yt.streams.get_audio_only()
-
-        # abort if size is bigger than maxFileSize
-        if video.filesize_mb > maxFileSize:
-            f.write(f"\nFailed, File size too big {video.filesize_mb} MB, " + song + ", " + url)
-            return
-
-        # download audio only as .mp4 and set paths
-        out_file = video.download(output_path=folder)
-        base, ext = os.path.splitext(out_file)
-
-        # ffmpeg, convert mp4 to mp3 without corrupting data and delete mp4
-        command = f'ffmpeg -i "{base}{ext}" "{base}.mp3"'
-        os.system(command)
-        os.remove(base + ext)
-
-        try:
-            f.write("\nOk, Downloaded, " + str(base) + f" - song: {song}" + ", " + str(url))
-        except Exception as e:
-            f.write("\nOk, Downloaded, " + str(e) + f" - song: {re.sub('[^A-Za-z0-9]+','', song)}" + ", " + str(url))
-
+        # Open log file
+        with open(os.path.join(folder, "songsLog.csv"), "a", newline='') as f:
+            # Get current timestamp
+            timestamp = datetime.datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
+            
+            # Search YouTube for the song
+            results = YoutubeSearch(song, max_results=1).to_dict()
+            url = 'https://www.youtube.com' + results[0].get('url_suffix')
+            
+            # Set up yt-dlp options
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'outtmpl': os.path.join(folder, '%(title)s.%(ext)s'),
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                }],
+                'max_filesize': maxFileSize * 1024 * 1024,  # Convert MB to bytes
+            }
+            
+            with YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
+            
+            f.write("\n" + timestamp + " Ok, Downloaded, " + song + ", " + url)
     except Exception as e:
-        f.write(f"\nFailed, {e}, " + song + ", " + str(url))
-
-    finally:
-        f.close()
+        with open(os.path.join(folder, "songsLog.csv"), "a", newline='') as f:
+            timestamp = datetime.datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
+            f.write("\n" + timestamp + f" Failed, {e}, " + song + ", " + url)
 
 if __name__ == '__main__':
-    tokenM = get_token()
-    playListID = "2JOHUWecmpONy8NBQk7alx"
-    listPlayList = complete_songlist(tokenM, playListID)
-    folder = "./songs/"
-    maxFileSize = 10    # in MB
+    parser = argparse.ArgumentParser(
+        description='Download songs from a Spotify playlist or a list of song names.'
+    )
+    parser.add_argument('--playlist', type=str,
+                        help='Spotify Playlist ID to download songs from')
+    parser.add_argument('--songs', type=str,
+                        help='Comma separated list of songs to download, e.g. "song1, song2, song3"')
+    parser.add_argument('--folder', type=str, default="./songs/",
+                        help="Output folder for downloads")
+    parser.add_argument('--maxfilesize', type=int, default=10,
+                        help="Maximum file size in MB for downloads")
+    args = parser.parse_args()
 
-    Parallel(n_jobs=-1,prefer='threads')(delayed(downloadSongs)(listPlayList[x], maxFileSize, folder) for x in range(0, len(listPlayList)))
+    # Ensure the output folder exists
+    if not os.path.exists(args.folder):
+        os.makedirs(args.folder)
+
+    if args.playlist:
+        tokenM = get_token()
+        listPlayList = complete_songlist(tokenM, args.playlist)
+    elif args.songs:
+        # Split the comma-separated songs into a list and strip any extra whitespace
+        listPlayList = [s.strip() for s in args.songs.split(',')]
+    else:
+        print("Please provide either a Spotify playlist ID with --playlist or a comma-separated list of songs with --songs")
+        exit(1)
+
+    Parallel(n_jobs=-1, prefer='threads')(
+        delayed(downloadSongs)(song, args.maxfilesize, args.folder) for song in listPlayList
+    )
