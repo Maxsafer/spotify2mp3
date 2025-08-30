@@ -9,7 +9,7 @@ from youtube_search import YoutubeSearch
 from joblib import Parallel, delayed
 from customSecrets import getSecret
 from yt_dlp import YoutubeDL
-from pytube import YouTube 
+from pytube import YouTube
 import requests
 from requests import post
 
@@ -88,6 +88,7 @@ def downloadSongs(song, maxFileSize, folder):
                 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3'}],
                 'max_filesize': maxFileSize * 1024 * 1024,
                 'noplaylist': True,
+                'cookiesfrombrowser': ('chrome',),   # <- use your browser’s cookies. Try ('edge',) or ('firefox',) if you use those.
             }
 
             with YoutubeDL(ydl_opts) as ydl:
