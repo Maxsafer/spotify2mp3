@@ -13,11 +13,13 @@ Download Spotify playlists as .mp3 from YouTube.
 <ul>- requests </ul>
 <ul>- flask </ul>
 
+------------------
 <h3> Install Python dependencies </h3>
 <h4> 1. Install dependencies </h4>
 
 ```pip install -r requirements.txt```
 
+------------------
 <h3> How to run as a CLI command </h3>
 <h4> 1. Download songs or playlists </h4>
 
@@ -29,6 +31,7 @@ Download Spotify playlists as .mp3 from YouTube.
 
 ```python main.py --songs "Daft Punk - One More Time, Radiohead - Creep" --folder ./songs/ --maxfilesize 10```
 
+------------------
 <h3> How to run as a web UI </h3>
 <h4> 1. Start the web app </h4>
 
@@ -37,3 +40,4 @@ Download Spotify playlists as .mp3 from YouTube.
 ```flask run```
 
 <h4> 2. Access the web app </h4>
+<img width="1316" height="487" alt="image" src="https://github.com/user-attachments/assets/2d5d81ed-a5fc-416a-85db-a8ae4db31ef7" />
