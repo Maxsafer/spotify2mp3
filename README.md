@@ -2,8 +2,9 @@
 Download Spotify playlists as .mp3 from YouTube.
 
 <h3> Dependencies </h3>
+<ul>- Python3: https://www.python.org/downloads </ul>
+<ul>- Ffmpeg: https://www.ffmpeg.org/download.html </ul>
 <ul>- A Spotify application token must be created and provided in order to run: https://developer.spotify.com/dashboard </ul>
-<ul>- ffmpeg </ul>
 
 <h3> pip dependencies </h3>
 <ul>- youtube-search </ul>
@@ -14,30 +15,40 @@ Download Spotify playlists as .mp3 from YouTube.
 <ul>- flask </ul>
 
 ------------------
-<h3> Install Python dependencies </h3>
-<h4> 1. Install dependencies </h4>
+<h3> 1. Install Python dependencies </h3>
 
-```pip install -r requirements.txt```
+```
+pip install -r requirements.txt
+```
 
 ------------------
-<h3> How to run as a CLI command </h3>
-<h4> 1. Download songs or playlists </h4>
+<h3> 2. Configuration </h3>
+<h4> Edit and set the Spotify token inside </h4>
+
+```customSecrets.py```
+
+------------------
+<h3> 3. How to run </h3>
+<h4> 3.1 CLI download songs or playlists </h4>
 
 - Download Spotify playlists:
 
-```python main.py --playlist 2JOHUWecmpONy8NBQk7alx --folder ./songs/ --maxfilesize 10```
+```
+python main.py --playlist 2JOHUWecmpONy8NBQk7alx --folder ./songs/ --maxfilesize 10
+```
 
 - Download songs by name:
 
-```python main.py --songs "Daft Punk - One More Time, Radiohead - Creep" --folder ./songs/ --maxfilesize 10```
+```
+python main.py --songs "Daft Punk - One More Time, Radiohead - Creep" --folder ./songs/ --maxfilesize 10
+```
 
 ------------------
-<h3> How to run as a web UI </h3>
-<h4> 1. Start the web app </h4>
+<h4> 3.2 How to run as a web UI </h4>
 
-- Start flask with any arguments you may need:
+- Start flask app with any arguments you may need:
 
-```flask run```
-
-<h4> 2. Access the web app </h4>
+```
+flask run
+```
 <img width="1316" height="487" alt="image" src="https://github.com/user-attachments/assets/2d5d81ed-a5fc-416a-85db-a8ae4db31ef7" />
