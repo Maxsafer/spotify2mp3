@@ -11,5 +11,5 @@ songs/
 *.webm
 songsLog.csv
 
-# secrets (don’t commit your tokens)
+# secrets
 customSecrets.py
