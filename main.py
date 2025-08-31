@@ -9,7 +9,7 @@ from youtube_search import YoutubeSearch
 from joblib import Parallel, delayed
 from customSecrets import getSecret
 from yt_dlp import YoutubeDL
-from pytube import YouTube
+# from pytube import YouTube
 import requests
 from requests import post
 

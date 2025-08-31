@@ -10,7 +10,6 @@ Download Spotify playlists as .mp3 from YouTube.
 <ul>- youtube-search </ul>
 <ul>- joblib </ul>
 <ul>- yt-dlp </ul>
-<ul>- pytube </ul>
 <ul>- requests </ul>
 <ul>- flask </ul>
 

@@ -1,6 +1,5 @@
 youtube-search
 joblib
 yt-dlp
-pytube
 requests
 flask
