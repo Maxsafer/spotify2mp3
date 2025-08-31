@@ -48,7 +48,8 @@ def download_item():
 
     # Clear the songsLog.csv file before running the command.
     try:
-        open(LOG_FILE, 'w').close()
+        os.makedirs(MUSIC_FOLDER, exist_ok=True)
+        open(LOG_FILE, 'w', encoding='utf-8').close()
     except Exception as e:
         return jsonify({"log": f"Error clearing log file: {e}"})
 
