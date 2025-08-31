@@ -1,2 +1,15 @@
-./__pycache__
+# python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# downloads & logs from this project
+songs/
+*.mp3
+*.mp4
+*.webm
+songsLog.csv
+
+# secrets (don’t commit your tokens)
 customSecrets.py
