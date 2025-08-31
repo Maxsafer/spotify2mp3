@@ -69,7 +69,7 @@ def complete_songlist(token, plID):
 def downloadSongs(song, maxFileSize, folder):
     url = ""
     try:
-        with open(os.path.join(folder, "songsLog.csv"), "a", newline='') as f:
+        with open(os.path.join(folder, "songsLog.csv"), "a", newline='', encoding="utf-8") as f:
             timestamp = datetime.datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
 
             # 1) Get several results and choose the first NON-playlist (prefer /watch or /shorts)
@@ -88,7 +88,6 @@ def downloadSongs(song, maxFileSize, folder):
                 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3'}],
                 'max_filesize': maxFileSize * 1024 * 1024,
                 'noplaylist': True,
-                'cookiesfrombrowser': ('chrome',),   # <- use your browser’s cookies. Try ('edge',) or ('firefox',) if you use those.
             }
 
             with YoutubeDL(ydl_opts) as ydl:
@@ -96,7 +95,7 @@ def downloadSongs(song, maxFileSize, folder):
 
             f.write("\n" + timestamp + " Ok, Downloaded, " + song + ", " + url)
     except Exception as e:
-        with open(os.path.join(folder, "songsLog.csv"), "a", newline='') as f:
+        with open(os.path.join(folder, "songsLog.csv"), "a", newline='', encoding="utf-8") as f:
             timestamp = datetime.datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
             f.write("\n" + timestamp + f" Failed, {e}, " + song + ", " + url)
 
