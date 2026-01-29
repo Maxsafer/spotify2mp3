@@ -88,6 +88,9 @@ def downloadSongs(song, maxFileSize, folder):
                 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3'}],
                 'max_filesize': maxFileSize * 1024 * 1024,
                 'noplaylist': True,
+                # UNCOMMENT THE FOLLOWING LINES IF DONWLOAD FAILS DUE TO 403 FORBIDDEN
+                # "js_runtimes": {"deno": {}},
+                # "extractor_args": {"youtube": {"player_client": ["android"]}},
             }
 
             with YoutubeDL(ydl_opts) as ydl:
