@@ -51,3 +51,9 @@ python main.py --songs "Daft Punk - One More Time, Radiohead - Creep" --folder .
 flask run
 ```
 <img width="1316" height="487" alt="image" src="https://github.com/user-attachments/assets/2d5d81ed-a5fc-416a-85db-a8ae4db31ef7" />
+
+------------------
+<h3> 4. Possibole errors </h3>
+<h4> 403: Forbidden </h4>
+
+If after installing all updated dependencies you get this error, try to uncomment [two lines](https://github.com/Maxsafer/spotify2mp3/blob/master/main.py#L91). The YouTube client will be spoofed.
